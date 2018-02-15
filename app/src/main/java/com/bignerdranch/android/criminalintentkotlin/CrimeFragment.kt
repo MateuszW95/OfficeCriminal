@@ -7,11 +7,9 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
-import android.widget.EditText
+import android.widget.*
 import kotlinx.android.synthetic.main.fragment_crime.*
+import java.util.*
 import java.util.zip.Inflater
 
 /**
@@ -23,10 +21,23 @@ class CrimeFragment:Fragment() {
     var mSolvedCheckBox:CheckBox?=null
     var mTitleField:EditText?=null
 
+    companion object {
+        private val ARG_CRIME_ID="crime_id"
+        fun newInstance(crimeId:UUID):Fragment{
+            var args:Bundle= Bundle()
+            args.putSerializable(ARG_CRIME_ID,crimeId)
+            var fragment:CrimeFragment= CrimeFragment()
+            fragment.arguments=args
+            return fragment
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mCrime= Crime()
+        var crimeId:UUID=arguments.getSerializable(ARG_CRIME_ID) as UUID
+        var cc:CrimeLab= CrimeLab.get(activity)
+        mCrime= cc.getCrime(crimeId)
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -34,6 +45,9 @@ class CrimeFragment:Fragment() {
         mTitleField=v?.findViewById(R.id.crime_title)
         mDateButton=v?.findViewById(R.id.crime_date)
         mSolvedCheckBox=v?.findViewById(R.id.crime_solved)
+        mTitleField!!.setText(mCrime!!.mTitle,TextView.BufferType.EDITABLE)
+        mDateButton!!.text=mCrime!!.mDate.toString()
+        mSolvedCheckBox!!.isChecked=mCrime!!.mSolved
         mTitleField?.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {
 

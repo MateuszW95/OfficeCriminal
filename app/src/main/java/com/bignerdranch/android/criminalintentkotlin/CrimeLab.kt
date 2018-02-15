@@ -3,6 +3,7 @@ package com.bignerdranch.android.criminalintentkotlin
 import android.content.Context
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * Created by mateusz on 11.02.18.
@@ -10,32 +11,32 @@ import kotlin.collections.ArrayList
 class CrimeLab {
     companion object {
         private  var sCrimeLab:CrimeLab?=null
-        private lateinit var mCrimes:ArrayList<Crime>
+        private lateinit var mCrimes:HashMap<UUID,Crime>
 
         fun get(context:Context):CrimeLab {
             if (sCrimeLab == null) {
-                return CrimeLab(context)
+                sCrimeLab=CrimeLab(context)
             }
-            else
-            {
-                return sCrimeLab as CrimeLab
-            }
+            return sCrimeLab as CrimeLab
+
         }
     }
     private constructor(context: Context){
-        mCrimes=ArrayList()
+        mCrimes= HashMap()
         for(i in 0..99){
-            var tmp:Crime= Crime()
+            var tmp= Crime()
             tmp.mTitle=("Sprawa #"+i.toString())
             tmp.mSolved=(i%2==0)
-            mCrimes.add(tmp)
+            mCrimes[tmp.mId]=tmp
         }
 
+
     }
-    fun getCrime(id:UUID):Crime{
-        return (mCrimes.filter { it.mId==id }.first())
+    fun getCrime(id:UUID): Crime? {
+        var c=mCrimes[id]
+        return c
     }
     fun getCrimes():ArrayList<Crime>{
-        return mCrimes
+        return ArrayList(mCrimes.values)
     }
 }

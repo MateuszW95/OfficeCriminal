@@ -43,7 +43,7 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
 
     private inner class CrimeHolder(inflater: LayoutInflater,var parent: ViewGroup):RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_crime,parent,false)),View.OnClickListener{
         override fun onClick(v: View?) {
-            var intent:Intent=CrimeActivity.newIntent(parent.context,mCrime.mId)
+            var intent:Intent=CrimePagerActivity.newIntent(parent.context,mCrime.mId)
             mPosition= position
             ContextCompat.startActivity(parent.context,intent,null)
 

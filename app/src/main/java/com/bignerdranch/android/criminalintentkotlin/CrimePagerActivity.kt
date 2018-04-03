@@ -55,7 +55,7 @@ class CrimePagerActivity:AppCompatActivity() {
                 bt_first.isEnabled = position != 0
                 bt_last.isEnabled = position != (mCrimes.size-1)
                 pos=position
-                return CrimeFragment.newInstance(crime.mId)
+                return CrimeFragment.newInstance(crime.mId!!)
             }
 
             override fun startUpdate(container: ViewGroup?) {
@@ -71,7 +71,7 @@ class CrimePagerActivity:AppCompatActivity() {
 
         }
         for (i in 0..(mCrimes.size-1)){
-            if(mCrimes[i].mId.equals(crimeId)){
+            if(mCrimes[i].mId!!.equals(crimeId)){
                 mViewPager.currentItem=i
                 break
             }

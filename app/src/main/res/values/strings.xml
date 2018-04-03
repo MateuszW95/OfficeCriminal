@@ -6,4 +6,16 @@
     <string name="crime_solved_label">Rozwiązana</string>
     <string name="first_item">Pierwsze</string>
     <string name="last_item">Ostatnie</string>
+    <string name="date_picker_title">Crime date:</string>
+    <string name="new_crime">Nowe przestępstwo</string>
+    <string name="show_subtitle">Pokaż podtytuł</string>
+    <string name="hide_subtite">Ukryj podytuł</string>
+    <string name="delete_crime">Usuń</string>
+    <string name="noElements">Lista przestęstw jest pusta</string>
+
+    <plurals name="crimeCount">
+        <item quantity="zero">%1$d przestępstw</item>
+        <item quantity="one">%1$d przestępstwo</item>
+        <item quantity="other">%1$d przestępstwa</item>
+    </plurals>
 </resources>

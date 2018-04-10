@@ -14,6 +14,8 @@ class CrimeDbSchema {
           val TITLE:String="title"
           val DATE:String="date"
           val SOLVED:String="solved"
+          val SUSPECT:String="suspect"
+          val SUSPECT_NUMBER:String="number"
       }
     }
 }

@@ -18,4 +18,17 @@
         <item quantity="one">%1$d przestępstwo</item>
         <item quantity="other">%1$d przestępstwa</item>
     </plurals>
+
+
+    <string name="crime_suspect_text">Wybierz podejrzanego</string>
+    <string name="crime_report_text">Wyślij raport o przestępstwie</string>
+    <string name="crime_report">%1s! Przestępstwo zostało ujawnione w dniu %2s. %3s, i %4s</string>
+    <string name="crime_report_solved">Sprawa rozwiązana</string>
+    <string name="crime_report_unsolved">Sprawa nierozwiązana</string>
+    <string name="crime_report_no_suspect">Brak podejrzanego</string>
+    <string name="crime_report_suspect">Podejrzany to %1s</string>
+    <string name="crime_report_subject">CriminalIntent - raport o przestępstwie</string>
+    <string name="sent_report">Wyłślij raport za pomocą </string>
+    <string name="crime_call">Zadzwoń do podejrzanego</string>
+
 </resources>

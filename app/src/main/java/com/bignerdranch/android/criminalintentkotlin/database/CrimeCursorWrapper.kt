@@ -15,11 +15,15 @@ class CrimeCursorWrapper(cursor: Cursor):CursorWrapper(cursor){
         var title:String=getString(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.TITLE))
         var date:Long=getLong(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.DATE))
         var isSolved:Int=getInt(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.SOLVED))
+        var suspect:String?=getString(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.SUSPECT))
+        var number:String?=getString(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.SUSPECT_NUMBER))
 
         var crime=Crime(UUID.fromString(uuidString))
         crime.mTitle=title
         crime.mDate= Date(date)
         crime.mSolved=(isSolved!=0)
+        crime.mSuspect=suspect
+        crime.mSuspectNumber=number
         return crime
     }
 }

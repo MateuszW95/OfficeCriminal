@@ -10,6 +10,8 @@ class Crime(id:UUID)  {
     var mTitle:String=""
     var mDate:Date= Date()
     var mSolved:Boolean= false
+    var mSuspect:String?=null
+    var mSuspectNumber:String?=null
     init {
         mId =id
         mDate= Date()

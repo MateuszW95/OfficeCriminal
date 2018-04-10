@@ -29,6 +29,8 @@ class CrimeLab {
             values.put(CrimeDbSchema.CrimeTable.Cols.TITLE,crime.mTitle)
             values.put(CrimeDbSchema.CrimeTable.Cols.DATE,crime.mDate.time)
             values.put(CrimeDbSchema.CrimeTable.Cols.SOLVED,if(crime.mSolved) 1 else 0)
+            values.put(CrimeDbSchema.CrimeTable.Cols.SUSPECT,crime.mSuspect)
+            values.put(CrimeDbSchema.CrimeTable.Cols.SUSPECT_NUMBER,crime.mSuspectNumber)
             return values
         }
     }

@@ -12,7 +12,11 @@ class CrimeBaseHelper(var context: Context): SQLiteOpenHelper(context, DATABASE_
     override fun onCreate(db: SQLiteDatabase?) {
         db!!.execSQL("create table "+ CrimeTable.NAME+"("+
         " _id integer primary key autoincrement, "+
-        CrimeTable.Cols.UUID+", "+ CrimeTable.Cols.TITLE+", "+ CrimeTable.Cols.DATE+", "+ CrimeTable.Cols.SOLVED+")")
+        CrimeTable.Cols.UUID+", "+ CrimeTable.Cols.TITLE+", "
+                + CrimeTable.Cols.DATE+", "
+                + CrimeTable.Cols.SOLVED+","
+                +CrimeTable.Cols.SUSPECT+","
+                + CrimeTable.Cols.SUSPECT_NUMBER+")")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

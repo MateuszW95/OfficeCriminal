@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import com.bignerdranch.android.criminalintentkotlin.database.CrimeBaseHelper
 import com.bignerdranch.android.criminalintentkotlin.database.CrimeCursorWrapper
 import com.bignerdranch.android.criminalintentkotlin.database.CrimeDbSchema
+import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -108,4 +109,10 @@ class CrimeLab {
         }
         return crimes
     }
+
+    fun getPhotoFile(crime:Crime):File {
+        var filesDir=mContext.filesDir
+        return File(filesDir,crime.getPhotoFileName())
+    }
+
 }

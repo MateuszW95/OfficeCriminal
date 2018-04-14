@@ -4,21 +4,26 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.ShareCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.FileProvider
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.*
 import kotlinx.android.synthetic.main.fragment_crime.*
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.Inflater
@@ -37,6 +42,10 @@ class CrimeFragment:Fragment() {
     var mReportButton:Button?=null
     var mSuspectButton:Button?=null
     var mCallSuspectButton:Button?=null
+    lateinit var mPhotoButton:ImageButton
+    lateinit var mPhotoView:ImageView
+    lateinit var mPhotoFile:File
+    val DISPLAY_IMAGE_DIALOG="display_image_dialog"
 
 
 
@@ -44,7 +53,8 @@ class CrimeFragment:Fragment() {
         private val ARG_CRIME_ID="crime_id"
         private val REQUEST_CODE:Int=0
         private val REQUEST_CONTACT=1
-        private val REQUEST_CONTACT_PERMISSION=88;
+        private val REQUEST_CONTACT_PERMISSION=88
+        private val REQUEST_PHOTO=2
         val KEY_ID:String="!@####"
         fun newInstance(crimeId:UUID):Fragment{
             var args:Bundle= Bundle()
@@ -82,6 +92,7 @@ class CrimeFragment:Fragment() {
         mReportButton=v!!.findViewById(R.id.crime_report)
         mSuspectButton=v!!.findViewById(R.id.crime_suspect)
         updateDate()
+        mPhotoFile=CrimeLab.get(context).getPhotoFile(mCrime!!)
         mDateButton!!.setOnClickListener(View.OnClickListener {
 
             var manager:FragmentManager=fragmentManager
@@ -148,6 +159,42 @@ class CrimeFragment:Fragment() {
         if(mCrime!!.mSuspectNumber==null){
             mCallSuspectButton!!.isEnabled=false
         }
+
+        mPhotoButton=v.findViewById(R.id.crime_camera)
+        mPhotoView=v.findViewById(R.id.crime_photo)
+
+        var captureImage=Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        val canTakePhoto=mPhotoFile!=null && captureImage.resolveActivity(activity.packageManager)!=null
+        mPhotoButton.isEnabled=canTakePhoto
+        mPhotoButton.setOnClickListener(View.OnClickListener {
+            val uri=FileProvider.getUriForFile(context,"com.bignerdranch.android.criminalintentkotlin.fileprovider",mPhotoFile)
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT,uri)
+
+            val cameraActivities=activity.packageManager.queryIntentActivities(captureImage,PackageManager.MATCH_DEFAULT_ONLY) as List<ResolveInfo>
+
+            for( i in cameraActivities){
+                activity.grantUriPermission(i.activityInfo.packageName,uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            }
+
+            startActivityForResult(captureImage, REQUEST_PHOTO)
+        })
+
+        mPhotoView.viewTreeObserver.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener{
+            override fun onGlobalLayout() {
+                mPhotoView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                updatePhotoView()
+            }
+        }
+        )
+
+        mPhotoView.setOnClickListener(View.OnClickListener {
+
+            var manager:FragmentManager=fragmentManager
+            var f= DisplayImageDialogFragment.newInstance(mPhotoFile.absolutePath)
+            f.show(manager,DISPLAY_IMAGE_DIALOG)
+        })
+
         return v
     }
 
@@ -199,10 +246,14 @@ class CrimeFragment:Fragment() {
             finally {
                 c.close()
             }
+        }else if(requestCode==REQUEST_PHOTO){
+            var uri=FileProvider.getUriForFile(context,"com.bignerdranch.android.criminalintentkotlin.fileprovider",mPhotoFile)
+            activity.revokeUriPermission(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            updatePhotoView()
         }
     }
     fun updateDate(){
-        var sdf:SimpleDateFormat=SimpleDateFormat("d/M/YYYY")
+        var sdf:SimpleDateFormat=SimpleDateFormat("d/M/YYYY H:m")
         mDateButton!!.text=sdf.format(mCrime!!.mDate)
     }
     fun getCrimeReport():String{
@@ -230,6 +281,16 @@ class CrimeFragment:Fragment() {
         return  report
     }
 
+    private fun updatePhotoView(){
+        if(mPhotoFile==null || !mPhotoFile.exists()){
+            mPhotoView.setImageBitmap(null)
+        } else if(mPhotoView!=null){
+            mPhotoView.setImageBitmap(PictureUtils.getScaledBitmap(mPhotoFile.path,mPhotoView))
+        }
+        else{
+            mPhotoView.setImageBitmap(PictureUtils.getScaledBitmap(mPhotoFile.path,activity))
+        }
+    }
     override fun onResume() {
         super.onResume()
         mCallSuspectButton!!.isEnabled = mCrime!!.mSuspectNumber != null

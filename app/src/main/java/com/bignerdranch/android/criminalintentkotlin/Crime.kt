@@ -20,4 +20,7 @@ class Crime(id:UUID)  {
 
     constructor() : this(UUID.randomUUID())
 
+    fun getPhotoFileName():String="IMG_"+mId.toString()+".jpg"
+
+
 }

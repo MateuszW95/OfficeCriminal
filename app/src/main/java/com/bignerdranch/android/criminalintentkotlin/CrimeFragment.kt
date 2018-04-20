@@ -2,6 +2,7 @@ package com.bignerdranch.android.criminalintentkotlin
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -46,7 +47,7 @@ class CrimeFragment:Fragment() {
     lateinit var mPhotoView:ImageView
     lateinit var mPhotoFile:File
     val DISPLAY_IMAGE_DIALOG="display_image_dialog"
-
+    private var mCallback:Callbacks?=null
 
 
     companion object {
@@ -55,6 +56,7 @@ class CrimeFragment:Fragment() {
         private val REQUEST_CONTACT=1
         private val REQUEST_CONTACT_PERMISSION=88
         private val REQUEST_PHOTO=2
+
         val KEY_ID:String="!@####"
         fun newInstance(crimeId:UUID):Fragment{
             var args:Bundle= Bundle()
@@ -69,6 +71,23 @@ class CrimeFragment:Fragment() {
         }
     }
 
+    interface Callbacks{
+        fun onCrimeUpdated(crime: Crime)
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        mCallback=context as Callbacks
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        mCallback=null
+    }
+     fun updateCrime() {
+        CrimeLab.get(context).updateCrime(mCrime!!)
+        mCallback!!.onCrimeUpdated(mCrime!!)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,6 +137,7 @@ class CrimeFragment:Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 mCrime?.mTitle=s.toString()
+                updateCrime()
             }
         })
 
@@ -150,6 +170,7 @@ class CrimeFragment:Fragment() {
         mSolvedCheckBox?.setOnCheckedChangeListener(object: CompoundButton.OnCheckedChangeListener{
             override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
                 mCrime?.mSolved=isChecked
+                updateCrime()
             }
 
         })
@@ -217,6 +238,7 @@ class CrimeFragment:Fragment() {
             var date:Date= data!!.getSerializableExtra(DatePickerFragment.EXTRA_DATE) as Date
             mCrime!!.mDate=date
             updateDate()
+            updateCrime()
 
         }else if(requestCode== REQUEST_CONTACT)
         {
@@ -242,6 +264,7 @@ class CrimeFragment:Fragment() {
                 mCrime!!.mSuspectNumber=c.getString(0);
                 mCrime!!.mSuspect=suspect
                 mSuspectButton!!.text=suspect
+                updateCrime()
             }
             finally {
                 c.close()
@@ -250,6 +273,7 @@ class CrimeFragment:Fragment() {
             var uri=FileProvider.getUriForFile(context,"com.bignerdranch.android.criminalintentkotlin.fileprovider",mPhotoFile)
             activity.revokeUriPermission(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             updatePhotoView()
+            updateCrime()
         }
     }
     fun updateDate(){

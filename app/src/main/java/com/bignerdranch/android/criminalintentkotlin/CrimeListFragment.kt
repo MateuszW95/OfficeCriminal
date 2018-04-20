@@ -2,6 +2,7 @@ package com.bignerdranch.android.criminalintentkotlin
 
 import android.app.Activity
 import android.app.Fragment
+import android.content.ComponentCallbacks
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,9 +16,11 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.*
 import android.widget.*
 import java.text.SimpleDateFormat
+import javax.security.auth.callback.Callback
 
 /**
  * Created by mateusz on 11.02.18.
@@ -29,9 +32,25 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
     lateinit var mAContext:Context
     private lateinit var mTextView: TextView
     private lateinit var mButtonNew:Button
+    private  var mCallbacks: Callbacks?=null
      var mPosition:Int=-1
     var showSubtilte:Boolean=false
     var CODE:Int=22
+
+    public interface Callbacks{
+        fun onCrimeSelected(crime: Crime)
+        fun onCrimeDeleted(crime: Crime)
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        mCallbacks=context as Callbacks
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        mCallbacks=null
+    }
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var v:View=inflater!!.inflate(R.layout.fragment_crime_list,container,false)
 
@@ -45,12 +64,33 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
 
             var tmpCrime=Crime()
             CrimeLab.get(activity).addCrime(tmpCrime)
-            var intent:Intent=CrimePagerActivity.newIntent(activity,tmpCrime.mId!!)
-            startActivityForResult(intent,CODE)
+            mCallbacks!!.onCrimeSelected(tmpCrime)
+            updateUI()
+            updateScreen()
+
         })
 
-        updateUI(activity)
+        updateUI()
         updateScreen()
+        val simpleCallback = object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                mCallbacks!!.onCrimeDeleted(CrimeLab.get(activity).getCrimes()[viewHolder.adapterPosition])
+                CrimeLab.get(activity).deleteCrime((CrimeLab.get(activity).getCrimes()[viewHolder.adapterPosition]))
+                updateUI()
+                updateScreen()
+
+
+
+
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(simpleCallback)
+        itemTouchHelper.attachToRecyclerView(mCrimeRecyclerView)
         return v
 
     }
@@ -58,8 +98,7 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
     private inner class CrimeHolder(inflater: LayoutInflater,var parent: ViewGroup):RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_crime,parent,false)),View.OnClickListener{
         override fun onClick(v: View?) {
             var intent:Intent=CrimePagerActivity.newIntent(parent.context,mCrime.mId!!)
-            mPosition= position
-            startActivityForResult(intent,CODE)
+            mCallbacks!!.onCrimeSelected(mCrime)
             //ContextCompat.str(parent.context,intent,null)
 
 
@@ -131,8 +170,8 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
             R.id.new_crime -> {
             var tmpCrime=Crime()
                 CrimeLab.get(activity).addCrime(tmpCrime)
-                var intent:Intent=CrimePagerActivity.newIntent(activity,tmpCrime.mId!!)
-                startActivityForResult(intent,CODE)
+                updateUI()
+                mCallbacks!!.onCrimeSelected(tmpCrime)
                 return true
             }
             R.id.show_subtitle->{
@@ -152,11 +191,11 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
 
     override fun onResume() {
         super.onResume()
-        updateUI(this.context)
+        updateUI()
         updateScreen()
         updateSubtile()
     }
-    fun updateUI( context:Context){
+    public fun updateUI( ){
         var crimeLab:CrimeLab= CrimeLab.get(activity)
         var crimes=crimeLab.getCrimes()
         if(mAdapter==null){
@@ -166,12 +205,13 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
         else
         {
             mAdapter!!.setCrimes(crimes)
-            mAdapter!!.notifyItemChanged(mPosition)
+            mAdapter!!.notifyDataSetChanged()
         }
         updateSubtile()
+        updateScreen()
     }
 
-    fun updateSubtile(){
+    public fun updateSubtile(){
         var crimeLab:CrimeLab= CrimeLab.get(activity)
         var crimeCount:Int=crimeLab.getCrimes().size
         var subtitle:String?=resources.getQuantityString(R.plurals.crimeCount,crimeCount,crimeCount)
@@ -189,7 +229,7 @@ class CrimeListFragment:android.support.v4.app.Fragment() {
         }
     }
 
-    fun updateScreen()
+    public fun updateScreen()
     {
         if(CrimeLab.get(activity).getCrimes().size!=0){
             mButtonNew.visibility=View.GONE

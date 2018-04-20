@@ -17,7 +17,12 @@ import java.util.*
 /**
  * Created by mateusz on 16.02.18.
  */
-class CrimePagerActivity:AppCompatActivity() {
+class CrimePagerActivity:AppCompatActivity(),CrimeFragment.Callbacks {
+    override fun onCrimeUpdated(crime: Crime) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+
     private lateinit var mViewPager: ViewPager
     private lateinit var mCrimes:List<Crime>
 
